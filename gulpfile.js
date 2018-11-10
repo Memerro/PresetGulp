@@ -23,8 +23,12 @@ gulp.task('sass', function() {
     return gulp.src('app/sass/main.sass')
     .pipe(sass())
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('app/css'))
+    .pipe(autoprefixer({
+            browsers: ['last 2 versions'],
+            cascade: false
+        }))
     .pipe(rename('main.min.css'))
+    .pipe(gulp.dest('app/css'))
     .pipe(browserSync.stream());
 });
 
