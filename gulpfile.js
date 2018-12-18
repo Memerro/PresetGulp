@@ -7,7 +7,22 @@ var gulp = require('gulp'),
     autoprefixer = require('gulp-autoprefixer'),
     imagemin = require('gulp-imagemin');
 
-gulp.task('js', function() {
+function serve(done) {
+  browserSync.init({
+    server: {
+      baseDir: "app"
+    },
+    port: 3000
+  });
+  done();
+}
+
+function servereload(done) {
+  browserSync.reload();
+  done();
+}
+
+function js() {
 	return gulp.src([
 			'app/libs/jquery/*.js',
 			'app/libs/slick/*.js',
@@ -17,9 +32,9 @@ gulp.task('js', function() {
 	.pipe(concat('common.min.js'))
 	.pipe(gulp.dest('app/js'))
 	.pipe(browserSync.stream());
-});
+}
 
-gulp.task('sass', function() {
+function css() {
     return gulp.src('app/sass/main.sass')
     .pipe(sass())
     .pipe(sass().on('error', sass.logError))
@@ -30,32 +45,27 @@ gulp.task('sass', function() {
     .pipe(rename('main.min.css'))
     .pipe(gulp.dest('app/css'))
     .pipe(browserSync.stream());
-});
+}
 
-gulp.task('serve', ['sass'], function() {
-    browserSync.init({
-        server: "app"
-    });
-});
+function watchfiles() {
+  gulp.watch('app/sass/**/*.sass', gulp.series(css, servereload));
+  gulp.watch("app/*.html", gulp.series(css, servereload));
+	gulp.watch('app/js/*.js', gulp.series(js, servereload));
+}
 
-gulp.task('watch', ['serve', 'sass', 'js'], function() {
-    gulp.watch('app/sass/**/*.sass', ["sass"])
-  	.on('change', browserSync.reload);
-  gulp.watch("app/*.html", ["sass"])
-	.on('change', browserSync.reload);
-	gulp.watch('app/js/*.js', ["js"])
-	.on('change', browserSync.reload);
-});
-
-gulp.task('default', ['watch']);
-
-gulp.task('imagemin', function() {
+ function images() {
 	return gulp.src('app/img/**/*')
 		.pipe(imagemin())
 		.pipe(gulp.dest('dist/img'))
-});
+}
 
-gulp.task('build', ['imagemin', 'sass', 'js'], function() {
+gulp.task("images", images);
+gulp.task("css", css);
+gulp.task("js", js);
+gulp.task("servereload", servereload);
+gulp.task("default", gulp.parallel(watchfiles, serve));
+
+gulp.task('build', gulp.series(js, css, images), function() {
     var buildFonts = gulp.src('app/fonts/**/*')
 		.pipe(gulp.dest('dist/fonts'));
 
