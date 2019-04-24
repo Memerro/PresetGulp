@@ -29,7 +29,7 @@ function js() {
 			'app/js/main.js'
 		]) 
 	.pipe(uglify())
-	.pipe(concat('common.min.js'))
+	.pipe(concat('main.min.js'))
 	.pipe(gulp.dest('app/js'))
 	.pipe(browserSync.stream());
 }
